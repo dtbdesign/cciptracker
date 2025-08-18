@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { Analytics } from "@vercel/analytics/react";
 import Sidebar from './components/Sidebar';
 import DailyDashboard from './components/DailyDashboard';
 import ChainsPage from './components/ChainsPage';
@@ -120,6 +121,9 @@ function App() {
           {renderContent()}
         </div>
       </main>
+      
+      {/* Vercel Analytics */}
+      <Analytics />
     </div>
   );
 }
