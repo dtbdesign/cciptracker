@@ -10,22 +10,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }) => {
-  const [lastUpdated, setLastUpdated] = React.useState<string>('');
-
-  React.useEffect(() => {
-    // Get the most recent CSV date and format it
-    const mostRecentDate = ccipDataService.getMostRecentDate();
-    if (mostRecentDate) {
-      const formattedDate = mostRecentDate.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      });
-      const formattedTime = '23:59:59 UTC';
-      setLastUpdated(`${formattedDate} ${formattedTime}`);
-    }
-  }, []);
-
   const menuItems = [
     { id: 'dashboard', label: 'Daily Dashboard', icon: BarChart3 },
     { id: 'chains', label: 'Chains', icon: Link2 },
@@ -85,35 +69,46 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, sidebarOpen,
         })}
       </nav>
       
-      <div className="absolute bottom-6 left-4 right-4 hidden lg:block">
-        {/* Buy Me a Coffee Button */}
-        <div className="mb-4">
-          <div 
-            className="bmc-btn-container"
-            data-name="bmc-button" 
-            data-slug="cciptracker" 
-            data-color="#5F7FFF" 
-            data-emoji="⛽"  
-            data-font="Inter" 
-            data-text="Fuel the Tracker" 
-            data-outline-color="#000000" 
-            data-font-color="#ffffff" 
-            data-coffee-color="#FFDD00"
-          ></div>
-        </div>
-        
-        {/* Status Section */}
-        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-600 mb-2">Status</p>
-          <div className="flex items-center space-x-2 mb-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-green-600">All Systems Operational</span>
+      <div className="absolute bottom-32 left-4 right-4 hidden lg:block">
+        <a
+          href="https://buymeacoffee.com/cciptracker"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full p-3 bg-[#5470de] hover:bg-[#4a5fd1] rounded-lg border border-[#5470de] shadow-md hover:shadow-lg transition-all duration-200 text-center group"
+        >
+          <div className="flex items-center justify-center">
+            <span className="text-white font-medium text-xs">Support CCIP Tracker</span>
           </div>
-          {lastUpdated && (
-            <div className="text-xs text-gray-500">
-              Last Updated: {lastUpdated}
-            </div>
-          )}
+        </a>
+      </div>
+
+      <div className="absolute bottom-6 left-4 right-4 hidden lg:block">
+        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <p className="text-sm text-gray-600 mb-2">Last Update</p>
+          <div className="text-sm text-gray-700">
+            {(() => {
+              try {
+                const mostRecentDate = ccipDataService.getMostRecentDate();
+                if (mostRecentDate) {
+                  const lastUpdate = new Date(mostRecentDate);
+                  lastUpdate.setUTCHours(23, 59, 59, 999); // Set to end of day UTC
+                  return `${lastUpdate.toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })} ${lastUpdate.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit', 
+                    timeZone: 'UTC',
+                    hour12: false 
+                  })} UTC`;
+                }
+                return 'Loading...';
+              } catch (error) {
+                return 'Loading...';
+              }
+            })()}
+          </div>
         </div>
       </div>
     </div>

@@ -110,10 +110,32 @@ function App() {
             >
               <Menu className="h-6 w-6 text-gray-600" />
             </button>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-600 font-medium">Live</span>
+                      <div className="flex items-center space-x-2">
+            <div className="text-sm text-gray-600">
+              {(() => {
+                try {
+                  const mostRecentDate = ccipDataService.getMostRecentDate();
+                  if (mostRecentDate) {
+                    const lastUpdate = new Date(mostRecentDate);
+                    lastUpdate.setUTCHours(23, 59, 59, 999); // Set to end of day UTC
+                    return `Last Updated: ${lastUpdate.toLocaleDateString('en-US', { 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })} ${lastUpdate.toLocaleTimeString('en-US', { 
+                      hour: '2-digit', 
+                      minute: '2-digit', 
+                      second: '2-digit', 
+                      timeZone: 'UTC',
+                      hour12: false 
+                    })} UTC`;
+                  }
+                  return 'Loading...';
+                } catch (error) {
+                  return 'Loading...';
+                }
+              })()}
             </div>
+          </div>
           </div>
         </div>
         
