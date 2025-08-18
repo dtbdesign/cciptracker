@@ -69,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, sidebarOpen,
         })}
       </nav>
       
-      <div className="absolute bottom-32 left-4 right-4 hidden lg:block">
+      <div className="absolute bottom-32 left-4 right-4">
         <a
           href="https://buymeacoffee.com/cciptracker"
           target="_blank"
