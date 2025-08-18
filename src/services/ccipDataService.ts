@@ -366,11 +366,19 @@ class CCIPDataService {
       .sort((a, b) => b.value - a.value)
       .slice(0, 10);
 
-    // Calculate top tokens
-    const tokenMap = new Map<string, { value: number; transactions: number; fees: number; chains: Set<string>; tokenName: string }>();
+    // Calculate top tokens - group by token name, not address
+    const tokenMap = new Map<string, { value: number; transactions: number; fees: number; chains: Set<string>; tokenName: string; symbol: string }>();
     currentDayData.transactions.forEach(tx => {
-      const tokenSymbol = tx.token;
-      const existing = tokenMap.get(tokenSymbol) || { value: 0, transactions: 0, fees: 0, chains: new Set(), tokenName: tx.tokenName };
+      // Use tokenName as the key to group by actual token, not address
+      const tokenKey = tx.tokenName || tx.token;
+      const existing = tokenMap.get(tokenKey) || { 
+        value: 0, 
+        transactions: 0, 
+        fees: 0, 
+        chains: new Set(), 
+        tokenName: tx.tokenName,
+        symbol: tx.token // Keep the token symbol/address for reference
+      };
       
       existing.value += tx.totalValue;
       existing.transactions += 1;
@@ -379,12 +387,12 @@ class CCIPDataService {
       existing.chains.add(tx.destNetworkName);
       existing.tokenName = tx.tokenName; // Keep the most recent token name
       
-      tokenMap.set(tokenSymbol, existing);
+      tokenMap.set(tokenKey, existing);
     });
 
     const topTokens = Array.from(tokenMap.entries())
-      .map(([symbol, stats]) => ({
-        name: stats.tokenName || symbol, // Use tokenName if available, fallback to symbol
+      .map(([tokenKey, stats]) => ({
+        name: stats.tokenName || tokenKey, // Use tokenName if available, fallback to key
         value: stats.value,
         transactions: stats.transactions,
         fees: stats.fees,
@@ -500,12 +508,13 @@ class CCIPDataService {
       Array.from(this.dailyData.values()).flatMap(d => d.transactions);
 
     allTransactions.forEach(tx => {
-      const tokenSymbol = tx.token;
+      // Use tokenName as the key to group by actual token, not address
+      const tokenKey = tx.tokenName || tx.token;
       
-      if (!tokenMap.has(tokenSymbol)) {
-        tokenMap.set(tokenSymbol, {
-          symbol: tokenSymbol,
-          name: tx.tokenName || tokenSymbol,
+      if (!tokenMap.has(tokenKey)) {
+        tokenMap.set(tokenKey, {
+          symbol: tx.token, // Keep the original token symbol/address
+          name: tx.tokenName || tx.token,
           volume: 0,
           transactions: 0,
           chains: new Set(),
@@ -513,7 +522,7 @@ class CCIPDataService {
         });
       }
       
-      const tokenStats = tokenMap.get(tokenSymbol)!;
+      const tokenStats = tokenMap.get(tokenKey)!;
       tokenStats.volume += tx.totalValue;
       tokenStats.transactions += 1;
       tokenStats.chains.add(tx.sourceNetworkName);
