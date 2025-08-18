@@ -122,7 +122,7 @@ const DailyDashboard: React.FC = () => {
           {/* Date Selector */}
           <div className="flex items-center space-x-3">
             <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+              className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white text-sm sm:text-base"
               value={selectedDate ? formatDateForInput(selectedDate) : ''}
               onChange={(e) => {
                 const date = new Date(e.target.value + 'T00:00:00.000Z');

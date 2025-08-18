@@ -84,7 +84,7 @@ const TopListCard: React.FC<TopListCardProps> = ({ title, data, icon: Icon }) =>
       <div className="space-y-4">
         {/* Table Headers */}
         {!isChainList && (
-          <div className="grid grid-cols-4 gap-4 px-2 py-2 border-b border-gray-200">
+          <div className="grid grid-cols-4 gap-2 sm:gap-4 px-2 py-2 border-b border-gray-200">
             <div className="text-left">
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Token</span>
             </div>
@@ -106,7 +106,8 @@ const TopListCard: React.FC<TopListCardProps> = ({ title, data, icon: Icon }) =>
                 onClick={() => handleSort('transactions')}
                 title="Click to sort by transactions"
               >
-                Transactions
+                <span className="hidden sm:inline">Transactions</span>
+                <span className="sm:hidden">Txs</span>
                 {getSortIndicator('transactions')}
               </span>
             </div>
@@ -125,7 +126,7 @@ const TopListCard: React.FC<TopListCardProps> = ({ title, data, icon: Icon }) =>
         )}
         
         {isChainList && (
-          <div className="grid grid-cols-[2fr_1.5fr_0.7fr_0.8fr] gap-3 px-2 py-2 border-b border-gray-200">
+          <div className="grid grid-cols-[2fr_1.5fr_0.7fr_0.8fr] gap-2 sm:gap-3 px-2 py-2 border-b border-gray-200">
             <div className="text-left">
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Chain</span>
             </div>
@@ -168,25 +169,25 @@ const TopListCard: React.FC<TopListCardProps> = ({ title, data, icon: Icon }) =>
         {/* Table Rows */}
         {sortedData.map((item, index) => (
           <div key={index} className={`group hover:bg-gray-50 -mx-2 px-2 py-2 rounded-lg transition-colors duration-200 ${
-            !isChainList ? 'grid grid-cols-4 gap-4 items-center' : 'grid grid-cols-[2fr_1.5fr_0.7fr_0.8fr] gap-3 items-center'
+            !isChainList ? 'grid grid-cols-4 gap-2 sm:gap-4 items-center' : 'grid grid-cols-[2fr_1.5fr_0.7fr_0.8fr] gap-2 sm:gap-3 items-center'
           }`}>
             {!isChainList ? (
               // Token table layout
               <>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 sm:space-x-3">
                   <div className="text-xs text-gray-400 font-medium">
                     {index + 1}
                   </div>
-                  <span className="font-semibold text-gray-900 text-sm lg:text-base">{item.name}</span>
+                  <span className="font-semibold text-gray-900 text-xs sm:text-sm lg:text-base truncate">{item.name}</span>
                 </div>
                 <div className="text-center">
-                  <p className="font-bold text-gray-900 text-sm lg:text-base">{item.value}</p>
+                  <p className="font-bold text-gray-900 text-xs sm:text-sm lg:text-base">{item.value}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-700 text-sm" style={{ fontWeight: sortField === 'transactions' ? 'bold' : 'normal' }}>{item.transactions?.toLocaleString() || '-'}</p>
+                  <p className="text-gray-700 text-xs sm:text-sm" style={{ fontWeight: sortField === 'transactions' ? 'bold' : 'normal' }}>{item.transactions?.toLocaleString() || '-'}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-700 text-sm" style={{ fontWeight: sortField === 'fees' ? 'bold' : 'normal' }}>${item.fees?.toFixed(2) || '-'}</p>
+                  <p className="text-gray-700 text-xs sm:text-sm" style={{ fontWeight: sortField === 'fees' ? 'bold' : 'normal' }}>${item.fees?.toFixed(2) || '-'}</p>
                 </div>
               </>
             ) : (
@@ -196,19 +197,19 @@ const TopListCard: React.FC<TopListCardProps> = ({ title, data, icon: Icon }) =>
                   <div className="w-5 text-xs text-gray-400 font-medium">
                     {index + 1}
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1 sm:space-x-2">
                     <ChainLogo chainName={item.chainName || item.name} size="sm" />
-                    <span className="font-semibold text-gray-900 text-sm">{item.name}</span>
+                    <span className="font-semibold text-gray-900 text-xs sm:text-sm truncate">{item.name}</span>
                   </div>
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-gray-900 text-sm" style={{ fontWeight: sortField === 'value' ? 'bold' : 'normal' }}>{item.value}</p>
+                  <p className="font-bold text-gray-900 text-xs sm:text-sm" style={{ fontWeight: sortField === 'value' ? 'bold' : 'normal' }}>{item.value}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-gray-700 text-xs" style={{ fontWeight: sortField === 'transactions' ? 'bold' : 'normal' }}>{item.transactions?.toLocaleString() || '-'}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-gray-700 text-xs" style={{ paddingRight: '8px', fontWeight: sortField === 'fees' ? 'bold' : 'normal' }}>${item.fees?.toFixed(2) || '-'}</p>
+                  <p className="text-gray-700 text-xs" style={{ paddingRight: '4px', fontWeight: sortField === 'fees' ? 'bold' : 'normal' }}>${item.fees?.toFixed(2) || '-'}</p>
                 </div>
               </>
             )}
