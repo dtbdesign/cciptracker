@@ -114,6 +114,18 @@ export const chainMapping: Record<string, ChainInfo> = {
     displayName: 'Solana',
     logo: 'https://docs.chain.link/assets/chains/solana.svg',
     color: '#8B4513'
+  },
+  'bitcoin-mainnet-bob-1': {
+    shortName: 'BOB',
+    displayName: 'Bob',
+    logo: 'https://docs.chain.link/assets/chains/bob.svg',
+    color: '#8B4513'
+  },
+  'ethereum-mainnet-mantle-1': {
+    shortName: 'MANTLE',
+    displayName: 'Mantle',
+    logo: 'https://docs.chain.link/assets/chains/mantle.svg',
+    color: '#8B4513'
   }
 };
 

@@ -93,9 +93,9 @@ const TopListCard: React.FC<TopListCardProps> = ({ title, data, icon: Icon }) =>
                 className={getHeaderStyle('value')}
                 style={getHeaderInlineStyle('value')}
                 onClick={() => handleSort('value')}
-                title="Click to sort by value"
+                title="Click to sort by volume"
               >
-                Value
+                Volume
                 {getSortIndicator('value')}
               </span>
             </div>
@@ -134,9 +134,9 @@ const TopListCard: React.FC<TopListCardProps> = ({ title, data, icon: Icon }) =>
                 className={getHeaderStyle('value', 'left')}
                 style={getHeaderInlineStyle('value')}
                 onClick={() => handleSort('value')}
-                title="Click to sort by value"
+                title="Click to sort by volume"
               >
-                Value
+                Volume
                 {getSortIndicator('value')}
               </span>
             </div>
