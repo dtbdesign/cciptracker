@@ -126,6 +126,12 @@ export const chainMapping: Record<string, ChainInfo> = {
     displayName: 'Mantle',
     logo: 'https://docs.chain.link/assets/chains/mantle.svg',
     color: '#8B4513'
+  },
+  'wemix-mainnet': {
+    shortName: 'WEMIX',
+    displayName: 'Wemix',
+    logo: 'https://docs.chain.link/assets/chains/wemix.svg',
+    color: '#8B4513'
   }
 };
 
