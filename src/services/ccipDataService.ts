@@ -337,7 +337,7 @@ class CCIPDataService {
         percentage: currentDayData.totalValue > 0 ? (stats.value / currentDayData.totalValue) * 100 : 0,
         trend: 'up' as const
       }))
-      .sort((a, b) => b.value - a.value)
+      .sort((a, b) => b.fees - a.fees)  // Sort by fees first, then by value for ties
       .slice(0, 10);
 
     // Calculate top destination chains
@@ -365,7 +365,7 @@ class CCIPDataService {
         percentage: currentDayData.totalValue > 0 ? (stats.value / currentDayData.totalValue) * 100 : 0,
         trend: 'up' as const
       }))
-      .sort((a, b) => b.value - a.value)
+      .sort((a, b) => b.fees - a.fees)  // Sort by fees first, then by value for ties
       .slice(0, 10);
 
     // Calculate top tokens - group by token name, not address
