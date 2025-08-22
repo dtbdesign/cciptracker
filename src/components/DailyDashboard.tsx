@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MetricCard from './MetricCard';
 import ChartCard from './ChartCard';
 import TopListCard from './TopListCard';
+import BannerAd from './BannerAd';
 import { TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { ccipDataService, DashboardMetrics } from '../services/ccipDataService';
 
@@ -118,6 +119,17 @@ const DailyDashboard: React.FC = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Daily Dashboard</h1>
           </div>
+          
+          {/* Compact Banner Ad - Centered (Hidden for now) */}
+          {/* <div className="flex justify-center">
+            <BannerAd 
+              imageSrc="/stake.link.jpg"
+              imageAlt="Stake your $LINK today - stake.link"
+              ctaLink="https://stake.link"
+              variant="primary"
+              compact={true}
+            />
+          </div> */}
           
           {/* Date Selector */}
           <div className="flex items-center space-x-3">

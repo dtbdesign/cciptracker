@@ -1,6 +1,5 @@
 import React from 'react';
 import { BarChart3, Link2, DollarSign, Coins, X } from 'lucide-react';
-import { track } from '@vercel/analytics';
 import { ccipDataService } from '../services/ccipDataService';
 
 interface SidebarProps {
@@ -23,10 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, sidebarOpen,
     setSidebarOpen(false); // Close sidebar on mobile after selection
   };
 
-  const handleSupportClick = () => {
-    track('Support CCIP Tracker');
-    window.open('https://buymeacoffee.com/cciptracker', '_blank', 'noopener,noreferrer');
-  };
+
 
   return (
     <div className={`fixed left-0 top-0 h-full w-64 bg-white text-gray-900 shadow-2xl z-30 transform transition-transform duration-300 ease-in-out ${
@@ -75,16 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, sidebarOpen,
         })}
       </nav>
       
-      <div className="absolute bottom-32 left-4 right-4">
-        <button
-          onClick={handleSupportClick}
-          className="block w-full p-3 bg-[#5470de] hover:bg-[#4a5fd1] rounded-lg border border-[#5470de] shadow-md hover:shadow-lg transition-all duration-200 text-center group"
-        >
-          <div className="flex items-center justify-center">
-            <span className="text-white font-medium text-xs">Support CCIP Tracker</span>
-          </div>
-        </button>
-      </div>
+
 
       <div className="absolute bottom-6 left-4 right-4 hidden lg:block">
         <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
