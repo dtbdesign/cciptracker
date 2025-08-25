@@ -127,6 +127,12 @@ export const chainMapping: Record<string, ChainInfo> = {
     logo: 'https://docs.chain.link/assets/chains/mantle.svg',
     color: '#8B4513'
   },
+  'ethereum-mainnet-linea-1': {
+    shortName: 'LINEA',
+    displayName: 'Linea',
+    logo: 'https://docs.chain.link/assets/chains/linea.svg',
+    color: '#8B4513'
+  },
   'wemix-mainnet': {
     shortName: 'WEMIX',
     displayName: 'Wemix',
