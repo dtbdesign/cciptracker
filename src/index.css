@@ -1,4 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+/* Local font declarations with multiple formats for better browser compatibility */
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SF-Pro-Display-Light.woff2') format('woff2'),
+       url('/fonts/SF-Pro-Display-Light.woff') format('woff'),
+       url('/fonts/SF-Pro-Display-Light.ttf') format('truetype'),
+       url('/fonts/SF-Pro-Display-Light.eot') format('embedded-opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SF-Pro-Display-Regular.woff2') format('woff2'),
+       url('/fonts/SF-Pro-Display-Regular.woff') format('woff'),
+       url('/fonts/SF-Pro-Display-Regular.ttf') format('truetype'),
+       url('/fonts/SF-Pro-Display-Regular.eot') format('embedded-opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SF-Pro-Display-Medium.woff2') format('woff2'),
+       url('/fonts/SF-Pro-Display-Medium.woff') format('woff'),
+       url('/fonts/SF-Pro-Display-Medium.ttf') format('truetype'),
+       url('/fonts/SF-Pro-Display-Medium.eot') format('embedded-opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SF-Pro-Display-Semibold.woff2') format('woff2'),
+       url('/fonts/SF-Pro-Display-Semibold.woff') format('woff'),
+       url('/fonts/SF-Pro-Display-Semibold.ttf') format('truetype'),
+       url('/fonts/SF-Pro-Display-Semibold.eot') format('embedded-opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SF-Pro-Display-Bold.woff2') format('woff2'),
+       url('/fonts/SF-Pro-Display-Bold.woff') format('woff'),
+       url('/fonts/SF-Pro-Display-Bold.ttf') format('truetype'),
+       url('/fonts/SF-Pro-Display-Bold.eot') format('embedded-opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;

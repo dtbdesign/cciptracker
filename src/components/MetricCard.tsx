@@ -5,7 +5,7 @@ interface MetricCardProps {
   title: string;
   value: string;
   change: string;
-  trend: 'up' | 'down';
+  trend: 'up' | 'down' | '';
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, change, trend }) => {
@@ -15,12 +15,14 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, change, trend }) 
         <h3 className="text-sm font-medium text-gray-600 mb-1">{title}</h3>
         <div className="flex items-center justify-between">
           <p className="text-2xl lg:text-3xl font-bold metric-value" style={{ color: '#4A6BDD' }}>{value}</p>
-          <div className={`flex items-center space-x-1 text-sm font-medium ${
-            trend === 'up' ? 'text-green-600' : 'text-red-600'
-          }`}>
-            {trend === 'up' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-            <span>{change}</span>
-          </div>
+          {trend && (
+            <div className={`flex items-center space-x-1 text-sm font-medium ${
+              trend === 'up' ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {trend === 'up' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+              <span>{change}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

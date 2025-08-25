@@ -119,38 +119,42 @@ class CCIPDataService {
         '08-20-2025 CCIP.csv',
         '08-21-2025 CCIP.csv',
         '08-22-2025 CCIP.csv',
-        '08-23-2025 CCIP.csv'
+        '08-23-2025 CCIP.csv',
+        '08-24-2025 CCIP.csv'
       ];
 
       const loadPromises = csvFiles.map(async (filename) => {
         try {
+          console.log(`Attempting to fetch: /${filename}`);
           const response = await fetch(`/${filename}`);
           if (!response.ok) {
             console.warn(`Failed to load ${filename}:`, response.status);
             return null;
           }
+          console.log(`Successfully loaded ${filename}`);
           
           const csvText = await response.text();
           const transactions = this.parseCSV(csvText);
           
-          // Extract date from filename
+          // Use filename as date identifier instead of parsing
+          const totalValue = transactions.reduce((sum, tx) => sum + tx.totalValue, 0);
+          const totalFees = transactions.reduce((sum, tx) => sum + tx.feeInUSD, 0);
+          
+          // Validate totals
+          if (isNaN(totalValue) || !isFinite(totalValue)) {
+            console.error(`Invalid totalValue for ${filename}:`, totalValue);
+          }
+          if (isNaN(totalFees) || !isFinite(totalFees)) {
+            console.error(`Invalid totalFees for ${filename}:`, totalFees);
+          }
+          
+          // Create a simple date object from filename for sorting
           const dateMatch = filename.match(/(\d{2})-(\d{2})-(\d{4})/);
           if (dateMatch) {
-            const month = parseInt(dateMatch[1]) - 1; // Month is 0-indexed
+            const month = parseInt(dateMatch[1]) - 1;
             const day = parseInt(dateMatch[2]);
             const year = parseInt(dateMatch[3]);
-            const date = new Date(Date.UTC(year, month, day));
-            
-            const totalValue = transactions.reduce((sum, tx) => sum + tx.totalValue, 0);
-            const totalFees = transactions.reduce((sum, tx) => sum + tx.feeInUSD, 0);
-            
-            // Validate totals
-            if (isNaN(totalValue) || !isFinite(totalValue)) {
-              console.error(`Invalid totalValue for ${filename}:`, totalValue);
-            }
-            if (isNaN(totalFees) || !isFinite(totalFees)) {
-              console.error(`Invalid totalFees for ${filename}:`, totalFees);
-            }
+            const date = new Date(year, month, day); // Simple date for sorting
             
             const dailyData: DailyData = {
               date,
@@ -160,8 +164,8 @@ class CCIPDataService {
               totalFees: isNaN(totalFees) || !isFinite(totalFees) ? 0 : totalFees
             };
             
-            const dateKey = date.toISOString().split('T')[0];
-            this.dailyData.set(dateKey, dailyData);
+            // Use filename as key to avoid timezone issues
+            this.dailyData.set(filename, dailyData);
             
             console.log(`Loaded ${filename}: ${transactions.length} transactions, $${totalValue.toFixed(2)} value, $${totalFees.toFixed(2)} fees`);
           }
@@ -172,10 +176,28 @@ class CCIPDataService {
 
       await Promise.all(loadPromises);
       
-      // Sort available dates
-      this.availableDates = Array.from(this.dailyData.values())
-        .map(d => d.date)
-        .sort((a, b) => b.getTime() - a.getTime()); // Most recent first
+      // Sort available dates by filename (most recent first)
+      this.availableDates = Array.from(this.dailyData.keys())
+        .sort((a, b) => {
+          // Extract date from filename for sorting
+          const dateA = a.match(/(\d{2})-(\d{2})-(\d{4})/);
+          const dateB = b.match(/(\d{2})-(\d{2})-(\d{4})/);
+          if (dateA && dateB) {
+            const yearA = parseInt(dateA[3]);
+            const monthA = parseInt(dateA[1]);
+            const dayA = parseInt(dateA[2]);
+            const yearB = parseInt(dateB[3]);
+            const monthB = parseInt(dateB[1]);
+            const dayB = parseInt(dateB[2]);
+            
+            // Sort by year, then month, then day (descending)
+            if (yearA !== yearB) return yearB - yearA;
+            if (monthA !== monthB) return monthB - monthA;
+            return dayB - dayA;
+          }
+          return 0;
+        })
+        .map(filename => this.dailyData.get(filename)!.date);
       
       this.isLoaded = true;
       this.updateCacheTimestamp();
@@ -197,7 +219,7 @@ class CCIPDataService {
     this.cache.lastUpdated = Date.now();
   }
 
-  private clearCache(): void {
+  clearCache(): void {
     this.cache.dashboardMetrics.clear();
     this.cache.networkStats = null;
     this.cache.tokenStats = null;
@@ -279,8 +301,13 @@ class CCIPDataService {
   }
 
   getDailyData(date: Date): DailyData | null {
-    const dateKey = date.toISOString().split('T')[0];
-    return this.dailyData.get(dateKey) || null;
+    // Find the filename that matches this date
+    for (const [filename, data] of this.dailyData.entries()) {
+      if (data.date.toISOString().split('T')[0] === date.toISOString().split('T')[0]) {
+        return data;
+      }
+    }
+    return null;
   }
 
   getDashboardMetrics(selectedDate: Date): DashboardMetrics {
@@ -554,9 +581,12 @@ class CCIPDataService {
       return this.cache.feeData.get(cacheKey)!;
     }
 
+    console.log('🔍 Generating fresh fee data for', timeRange);
+    console.log('Available dates:', this.availableDates);
+
     // For now, generate sample data based on available dates
     // In the future, this could be enhanced to show actual hourly/daily fee data
-    const data = [];
+    const data: Array<{ time: string; value: number }> = [];
     
     if (timeRange === '24h') {
       // Generate 24 hourly data points
@@ -575,14 +605,20 @@ class CCIPDataService {
       }
     } else if (timeRange === '7d') {
       // Use actual daily data for the last 7 days
-      const last7Days = this.availableDates.slice(0, 7);
+      console.log('Available dates (most recent first):', this.availableDates.map(d => d.toISOString().split('T')[0]));
+      const last7Days = this.availableDates.slice(0, 7).reverse(); // Reverse to show chronologically
+      console.log('Last 7 days (chronological order):', last7Days.map(d => d.toISOString().split('T')[0]));
+      
       last7Days.forEach(date => {
         const dailyData = this.getDailyData(date);
+        console.log('Daily data for', date.toISOString().split('T')[0], ':', dailyData);
         if (dailyData) {
-          const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short' });
-          data.push({ time: dayLabel, value: dailyData.totalFees });
+          const dateLabel = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          data.push({ time: dateLabel, value: dailyData.totalFees });
+          console.log('Added data point:', { time: dateLabel, value: dailyData.totalFees });
         }
       });
+      console.log('Final 7d data:', data);
     } else if (timeRange === '30d') {
       // Use actual daily data for the last 30 days
       const last30Days = this.availableDates.slice(0, 30);
