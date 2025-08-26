@@ -164,7 +164,26 @@ const FeesPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Fees Analytics</h1>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Fees Analytics</h1>
+          </div>
+          
+          {/* Time Range Toggle */}
+          <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+            <button
+              className="px-3 py-1 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm"
+            >
+              7d
+            </button>
+            <button
+              disabled
+              className="px-3 py-1 text-sm font-medium rounded-md text-gray-400 cursor-not-allowed"
+            >
+              30d
+            </button>
+          </div>
+        </div>
       </div>
 
 
@@ -193,12 +212,8 @@ const FeesPage: React.FC = () => {
 
       {/* Fee Line Chart */}
       <div className="bg-white rounded-xl p-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <h2 className="text-xl font-semibold text-gray-900">Daily Fees</h2>
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <TrendingUpIcon className="w-4 h-4" />
-            <span>Daily fees trend</span>
-          </div>
         </div>
         
         {feeData.length > 0 ? (
