@@ -124,7 +124,7 @@ class CCIPDataService {
         '08-25-2025 CCIP.csv',
         '08-26-2025 CCIP.csv',
         '08-27-2025 CCIP.csv',
-        '8-28-2025 CCIP.csv'
+        '08-28-2025 CCIP.csv'
       ];
 
       const loadPromises = csvFiles.map(async (filename) => {
@@ -153,7 +153,7 @@ class CCIPDataService {
           }
           
           // Create a simple date object from filename for sorting
-          const dateMatch = filename.match(/(\d{2})-(\d{2})-(\d{4})/);
+          const dateMatch = filename.match(/(\d{1,2})-(\d{1,2})-(\d{4})/);
           if (dateMatch) {
             const month = parseInt(dateMatch[1]) - 1;
             const day = parseInt(dateMatch[2]);
@@ -184,8 +184,8 @@ class CCIPDataService {
       this.availableDates = Array.from(this.dailyData.keys())
         .sort((a, b) => {
           // Extract date from filename for sorting
-          const dateA = a.match(/(\d{2})-(\d{2})-(\d{4})/);
-          const dateB = b.match(/(\d{2})-(\d{2})-(\d{4})/);
+          const dateA = a.match(/(\d{1,2})-(\d{1,2})-(\d{4})/);
+          const dateB = b.match(/(\d{1,2})-(\d{1,2})-(\d{4})/);
           if (dateA && dateB) {
             const yearA = parseInt(dateA[3]);
             const monthA = parseInt(dateA[1]);
@@ -263,6 +263,11 @@ class CCIPDataService {
       headers.forEach((header, index) => {
         transaction[header] = values[index] || '';
       });
+      
+      // Handle both 'totalValue' and 'value' column names for backward compatibility
+      if (transaction.value !== undefined && transaction.totalValue === undefined) {
+        transaction.totalValue = transaction.value;
+      }
       
       // Validate and clean numeric fields
       const originalTotalValue = transaction.totalValue;
