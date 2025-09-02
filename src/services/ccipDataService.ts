@@ -381,7 +381,12 @@ class CCIPDataService {
         percentage: currentDayData.totalValue > 0 ? (stats.value / currentDayData.totalValue) * 100 : 0,
         trend: 'up' as const
       }))
-      .sort((a, b) => b.fees - a.fees)  // Sort by fees first, then by value for ties
+      .sort((a, b) => {
+        // Primary sort by transactions, then by value, then by fees
+        if (b.transactions !== a.transactions) return b.transactions - a.transactions;
+        if (b.value !== a.value) return b.value - a.value;
+        return b.fees - a.fees;
+      })
       .slice(0, 10);
 
     // Calculate top destination chains
@@ -409,7 +414,12 @@ class CCIPDataService {
         percentage: currentDayData.totalValue > 0 ? (stats.value / currentDayData.totalValue) * 100 : 0,
         trend: 'up' as const
       }))
-      .sort((a, b) => b.fees - a.fees)  // Sort by fees first, then by value for ties
+      .sort((a, b) => {
+        // Primary sort by transactions, then by value, then by fees
+        if (b.transactions !== a.transactions) return b.transactions - a.transactions;
+        if (b.value !== a.value) return b.value - a.value;
+        return b.fees - a.fees;
+      })
       .slice(0, 10);
 
     // Calculate top tokens - group by token name, not address

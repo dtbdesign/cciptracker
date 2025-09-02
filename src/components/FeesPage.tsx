@@ -133,7 +133,11 @@ const FeesPage: React.FC = () => {
                 percentage: totalFees7Days > 0 ? (stats.fees / totalFees7Days) * 100 : 0
               };
             })
-            .sort((a, b) => b.fees - a.fees)
+            .sort((a, b) => {
+              // Primary sort by transactions, then by fees
+              if (b.transactions !== a.transactions) return b.transactions - a.transactions;
+              return b.fees - a.fees;
+            })
             .slice(0, 8); // Top 8 chains
           
           setChainStats(chainStatsArray);
