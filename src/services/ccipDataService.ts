@@ -132,7 +132,10 @@ class CCIPDataService {
         '09-02-2025 CCIP.csv',
         '09-03-2025 CCIP.csv',
         '09-04-2025 CCIP.csv',
-        '09-05-2025 CCIP.csv'
+        '09-05-2025 CCIP.csv',
+        '09-06-2025 CCIP.csv',
+        '09-07-2025 CCIP.csv',
+        '09-08-2025 CCIP.csv'
       ];
 
       const loadPromises = csvFiles.map(async (filename) => {
