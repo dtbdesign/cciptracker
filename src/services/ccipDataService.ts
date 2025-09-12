@@ -392,9 +392,9 @@ class CCIPDataService {
         trend: 'up' as const
       }))
       .sort((a, b) => {
-        // Primary sort by transactions, then by value, then by fees
-        if (b.transactions !== a.transactions) return b.transactions - a.transactions;
+        // Primary sort by value (volume), then by transactions, then by fees
         if (b.value !== a.value) return b.value - a.value;
+        if (b.transactions !== a.transactions) return b.transactions - a.transactions;
         return b.fees - a.fees;
       })
       .slice(0, 10);
@@ -425,9 +425,9 @@ class CCIPDataService {
         trend: 'up' as const
       }))
       .sort((a, b) => {
-        // Primary sort by transactions, then by value, then by fees
-        if (b.transactions !== a.transactions) return b.transactions - a.transactions;
+        // Primary sort by value (volume), then by transactions, then by fees
         if (b.value !== a.value) return b.value - a.value;
+        if (b.transactions !== a.transactions) return b.transactions - a.transactions;
         return b.fees - a.fees;
       })
       .slice(0, 10);
