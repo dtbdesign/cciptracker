@@ -15,11 +15,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, sidebarOpen,
     { id: 'chains', label: 'Chains', icon: Link2 },
     { id: 'fees', label: 'Fees', icon: DollarSign },
     { id: 'tokens', label: 'Tokens', icon: Coins },
+    { id: 'stake', label: 'Stake Instantly', icon: null }, // Special case for SVG
   ];
 
   const handleTabClick = (tabId: string) => {
-    setActiveTab(tabId);
-    setSidebarOpen(false); // Close sidebar on mobile after selection
+    if (tabId === 'stake') {
+      // Open Curve Finance in new tab
+      window.open('https://www.curve.finance/dex/ethereum/pools/factory-stable-ng-403/deposit', '_blank', 'noopener,noreferrer');
+      setSidebarOpen(false); // Close sidebar on mobile after selection
+    } else {
+      setActiveTab(tabId);
+      setSidebarOpen(false); // Close sidebar on mobile after selection
+    }
   };
 
 
@@ -50,28 +57,29 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, sidebarOpen,
       
       <nav className="p-4 space-y-2">
         {menuItems.map((item) => {
-          const Icon = item.icon;
           return (
             <button
               key={item.id}
               onClick={() => handleTabClick(item.id)}
               className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-200 ${
-                activeTab === item.id
+                activeTab === item.id && item.id !== 'stake'
                   ? 'text-white shadow-lg'
                   : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
               }`}
               style={{
-                backgroundColor: activeTab === item.id ? '#5470de' : 'transparent'
+                backgroundColor: activeTab === item.id && item.id !== 'stake' ? '#5470de' : 'transparent'
               }}
             >
-              <Icon className="h-5 w-5" />
+              {item.id === 'stake' ? (
+                <img src="/sdl-logo-dark.svg" alt="SDL" className="h-5 w-5" />
+              ) : (
+                item.icon && <item.icon className="h-5 w-5" />
+              )}
               <span className="font-medium">{item.label}</span>
             </button>
           );
         })}
       </nav>
-      
-
 
       <div className="absolute bottom-6 left-4 right-4 hidden lg:block">
         <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">

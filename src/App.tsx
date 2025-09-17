@@ -6,6 +6,7 @@ import DailyDashboard from './components/DailyDashboard';
 import ChainsPage from './components/ChainsPage';
 import FeesPage from './components/FeesPage';
 import TokensPage from './components/TokensPage';
+import StakePage from './components/StakePage';
 import { ccipDataService } from './services/ccipDataService';
 
 function App() {
@@ -78,6 +79,8 @@ function App() {
         return <FeesPage />;
       case 'tokens':
         return <TokensPage />;
+      case 'stake':
+        return <StakePage />;
       default:
         return <DailyDashboard />;
     }

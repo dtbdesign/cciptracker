@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MetricCard from './MetricCard';
-import ChartCard from './ChartCard';
 import TopListCard from './TopListCard';
-import BannerAd from './BannerAd';
 import { TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { ccipDataService, DashboardMetrics } from '../services/ccipDataService';
 
@@ -47,15 +45,6 @@ const DailyDashboard: React.FC = () => {
     }
   }, [selectedDate]);
 
-  const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      timeZone: 'UTC'
-    });
-  };
 
   const formatDateForInput = (date: Date): string => {
     return date.toISOString().split('T')[0];
@@ -98,15 +87,6 @@ const DailyDashboard: React.FC = () => {
     }).format(value);
   };
 
-  const formatNumber = (value: number) => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(1)}M`;
-    } else if (value >= 1000) {
-      return `${(value / 1000).toFixed(1)}K`;
-    } else {
-      return value.toLocaleString();
-    }
-  };
 
   const formatTransactionCount = (value: number) => {
     return value.toLocaleString();
@@ -131,26 +111,21 @@ const DailyDashboard: React.FC = () => {
             />
           </div> */}
           
-          {/* Date Selector */}
+          {/* Date Selector - Calendar Picker */}
           <div className="flex items-center space-x-3">
-            <select
+            <input
+              type="date"
               className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white text-sm sm:text-base"
               value={selectedDate ? formatDateForInput(selectedDate) : ''}
+              min={availableDates.length > 0 ? formatDateForInput(availableDates[availableDates.length - 1]) : ''}
+              max={availableDates.length > 0 ? formatDateForInput(availableDates[0]) : ''}
               onChange={(e) => {
-                const date = new Date(e.target.value + 'T00:00:00.000Z');
-                setSelectedDate(date);
+                if (e.target.value) {
+                  const date = new Date(e.target.value + 'T00:00:00.000Z');
+                  setSelectedDate(date);
+                }
               }}
-            >
-              {availableDates.length === 0 ? (
-                <option value="">No dates available</option>
-              ) : (
-                availableDates.map((date) => (
-                  <option key={date.toISOString()} value={formatDateForInput(date)}>
-                    {formatDate(date)}
-                  </option>
-                ))
-              )}
-            </select>
+            />
           </div>
         </div>
       </div>
