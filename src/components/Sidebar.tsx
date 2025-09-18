@@ -20,8 +20,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, sidebarOpen,
 
   const handleTabClick = (tabId: string) => {
     if (tabId === 'stake') {
-      // Open Curve Finance in new tab
-      window.open('https://www.curve.finance/dex/ethereum/pools/factory-stable-ng-403/deposit', '_blank', 'noopener,noreferrer');
+      // Open Curve Finance swap page in new tab
+      window.open('https://www.curve.finance/dex/ethereum/pools/factory-stable-ng-403/swap', '_blank', 'noopener,noreferrer');
       setSidebarOpen(false); // Close sidebar on mobile after selection
     } else {
       setActiveTab(tabId);
