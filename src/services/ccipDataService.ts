@@ -79,11 +79,11 @@ class CCIPDataService {
   };
   private cacheExpiry = 5 * 60 * 1000; // 5 minutes cache expiry
 
-  // Dynamically discover CSV files in the public folder
+  // Optimized CSV file discovery with batch processing and caching
   private async discoverCSVFiles(): Promise<string[]> {
     const csvFiles: string[] = [];
     
-    // Known CSV file patterns to look for
+    // Known CSV file patterns to look for (legacy format)
     const knownFiles = [
       'CCIP Stats - 08-14-2025 CCIP.csv',
       'CCIP Stats - 08-15-2025 CCIP.csv',
@@ -91,22 +91,13 @@ class CCIPDataService {
       'CCIP Stats - 08-17-2025 CCIP.csv'
     ];
     
-    // Add known files first
-    for (const filename of knownFiles) {
-      try {
-        const response = await fetch(`/${filename}`, { method: 'HEAD' });
-        if (response.ok) {
-          csvFiles.push(filename);
-        }
-      } catch (error) {
-        // File doesn't exist, skip it
-      }
-    }
+    // Generate all possible filenames first, then batch check them
+    const candidateFiles = [...knownFiles];
     
-    // Generate date-based CSV filenames from August 18, 2025 to current date + 30 days
+    // Generate date-based CSV filenames from August 18, 2025 to current date + 7 days (reduced range)
     const startDate = new Date(2025, 7, 18); // August 18, 2025
     const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 30); // Look ahead 30 days
+    endDate.setDate(endDate.getDate() + 7); // Reduced from 30 to 7 days for faster loading
     
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
@@ -114,30 +105,61 @@ class CCIPDataService {
       const day = currentDate.getDate();
       const year = currentDate.getFullYear();
       
-      // Try different filename formats
+      // Generate the most common filename formats
       const formats = [
         `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}-${year} CCIP.csv`,
-        `${month}-${day}-${year} CCIP.csv`,
-        `0${month}-${day}-${year} CCIP.csv` // Handle single digit months with leading zero
+        `${month}-${day}-${year} CCIP.csv`
       ];
       
-      for (const filename of formats) {
-        try {
-          const response = await fetch(`/${filename}`, { method: 'HEAD' });
-          if (response.ok && !csvFiles.includes(filename)) {
-            csvFiles.push(filename);
-            break; // Found this date, move to next
-          }
-        } catch (error) {
-          // File doesn't exist, try next format
-        }
-      }
-      
+      candidateFiles.push(...formats);
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    console.log(`Discovered ${csvFiles.length} CSV files:`, csvFiles);
+    // Batch check files with limited concurrency to avoid overwhelming the server
+    const batchSize = 10; // Process 10 files at a time
+    const batches = [];
+    for (let i = 0; i < candidateFiles.length; i += batchSize) {
+      batches.push(candidateFiles.slice(i, i + batchSize));
+    }
+    
+    console.log(`Checking ${candidateFiles.length} potential CSV files in ${batches.length} batches...`);
+    
+    for (const batch of batches) {
+      const batchPromises = batch.map(async (filename) => {
+        try {
+          const response = await fetch(`/${filename}`, { method: 'HEAD' });
+          return response.ok ? filename : null;
+        } catch (error) {
+          return null;
+        }
+      });
+      
+      const batchResults = await Promise.all(batchPromises);
+      const validFiles = batchResults.filter((filename): filename is string => filename !== null);
+      csvFiles.push(...validFiles);
+    }
+    
+    // Sort files by date (most recent first)
+    csvFiles.sort((a, b) => {
+      const dateA = this.extractDateFromFilename(a);
+      const dateB = this.extractDateFromFilename(b);
+      return dateB.getTime() - dateA.getTime();
+    });
+    
+    console.log(`✅ Discovered ${csvFiles.length} CSV files`);
     return csvFiles;
+  }
+  
+  // Helper method to extract date from filename for sorting
+  private extractDateFromFilename(filename: string): Date {
+    const dateMatch = filename.match(/(\d{1,2})-(\d{1,2})-(\d{4})/);
+    if (dateMatch) {
+      const month = parseInt(dateMatch[1]) - 1;
+      const day = parseInt(dateMatch[2]);
+      const year = parseInt(dateMatch[3]);
+      return new Date(year, month, day);
+    }
+    return new Date(0); // Fallback for files that don't match pattern
   }
 
   // Centralized data loading with caching
@@ -172,38 +194,43 @@ class CCIPDataService {
       // Dynamically discover all CSV files in the public folder
       const csvFiles = await this.discoverCSVFiles();
 
-      const loadPromises = csvFiles.map(async (filename) => {
-        try {
-          console.log(`Attempting to fetch: /${filename}`);
-          const response = await fetch(`/${filename}`);
-          if (!response.ok) {
-            console.warn(`Failed to load ${filename}:`, response.status);
-            return null;
-          }
-          console.log(`Successfully loaded ${filename}`);
-          
-          const csvText = await response.text();
-          const transactions = this.parseCSV(csvText);
-          
-          // Use filename as date identifier instead of parsing
-          const totalValue = transactions.reduce((sum, tx) => sum + tx.totalValue, 0);
-          const totalFees = transactions.reduce((sum, tx) => sum + tx.feeInUSD, 0);
-          
-          // Validate totals
-          if (isNaN(totalValue) || !isFinite(totalValue)) {
-            console.error(`Invalid totalValue for ${filename}:`, totalValue);
-          }
-          if (isNaN(totalFees) || !isFinite(totalFees)) {
-            console.error(`Invalid totalFees for ${filename}:`, totalFees);
-          }
-          
-          // Create a simple date object from filename for sorting
-          const dateMatch = filename.match(/(\d{1,2})-(\d{1,2})-(\d{4})/);
-          if (dateMatch) {
-            const month = parseInt(dateMatch[1]) - 1;
-            const day = parseInt(dateMatch[2]);
-            const year = parseInt(dateMatch[3]);
-            const date = new Date(year, month, day); // Simple date for sorting
+      // Load CSV files with controlled concurrency for better performance
+      const loadBatchSize = 5; // Load 5 files at a time to avoid overwhelming the browser
+      const loadBatches = [];
+      for (let i = 0; i < csvFiles.length; i += loadBatchSize) {
+        loadBatches.push(csvFiles.slice(i, i + loadBatchSize));
+      }
+      
+      console.log(`📊 Loading ${csvFiles.length} CSV files in ${loadBatches.length} batches...`);
+      
+      for (const [batchIndex, batch] of loadBatches.entries()) {
+        console.log(`📦 Processing batch ${batchIndex + 1}/${loadBatches.length} (${batch.length} files)`);
+        
+        const batchPromises = batch.map(async (filename) => {
+          try {
+            const response = await fetch(`/${filename}`);
+            if (!response.ok) {
+              console.warn(`❌ Failed to load ${filename}:`, response.status);
+              return null;
+            }
+            
+            const csvText = await response.text();
+            const transactions = this.parseCSV(csvText);
+            
+            // Calculate totals
+            const totalValue = transactions.reduce((sum, tx) => sum + tx.totalValue, 0);
+            const totalFees = transactions.reduce((sum, tx) => sum + tx.feeInUSD, 0);
+            
+            // Validate totals
+            if (isNaN(totalValue) || !isFinite(totalValue)) {
+              console.error(`Invalid totalValue for ${filename}:`, totalValue);
+            }
+            if (isNaN(totalFees) || !isFinite(totalFees)) {
+              console.error(`Invalid totalFees for ${filename}:`, totalFees);
+            }
+            
+            // Extract date from filename
+            const date = this.extractDateFromFilename(filename);
             
             const dailyData: DailyData = {
               date,
@@ -216,14 +243,16 @@ class CCIPDataService {
             // Use filename as key to avoid timezone issues
             this.dailyData.set(filename, dailyData);
             
-            console.log(`Loaded ${filename}: ${transactions.length} transactions, $${totalValue.toFixed(2)} value, $${totalFees.toFixed(2)} fees`);
+            console.log(`✅ ${filename}: ${transactions.length} txs, $${totalValue.toFixed(0)} volume`);
+            return filename;
+          } catch (error) {
+            console.warn(`❌ Error loading ${filename}:`, error);
+            return null;
           }
-        } catch (error) {
-          console.warn(`Error loading ${filename}:`, error);
-        }
-      });
-
-      await Promise.all(loadPromises);
+        });
+        
+        await Promise.all(batchPromises);
+      }
       
       // Sort available dates by filename (most recent first)
       this.availableDates = Array.from(this.dailyData.keys())
