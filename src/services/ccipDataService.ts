@@ -1,4 +1,4 @@
-import { getChainInfo, getShortChainName, getDisplayChainName } from '../utils/chainMapping';
+import { getShortChainName, getDisplayChainName } from '../utils/chainMapping';
 
 export interface CCIPTransaction {
   transactionHash: string;
@@ -79,6 +79,67 @@ class CCIPDataService {
   };
   private cacheExpiry = 5 * 60 * 1000; // 5 minutes cache expiry
 
+  // Dynamically discover CSV files in the public folder
+  private async discoverCSVFiles(): Promise<string[]> {
+    const csvFiles: string[] = [];
+    
+    // Known CSV file patterns to look for
+    const knownFiles = [
+      'CCIP Stats - 08-14-2025 CCIP.csv',
+      'CCIP Stats - 08-15-2025 CCIP.csv',
+      'CCIP Stats - 08-16-2025 CCIP.csv',
+      'CCIP Stats - 08-17-2025 CCIP.csv'
+    ];
+    
+    // Add known files first
+    for (const filename of knownFiles) {
+      try {
+        const response = await fetch(`/${filename}`, { method: 'HEAD' });
+        if (response.ok) {
+          csvFiles.push(filename);
+        }
+      } catch (error) {
+        // File doesn't exist, skip it
+      }
+    }
+    
+    // Generate date-based CSV filenames from August 18, 2025 to current date + 30 days
+    const startDate = new Date(2025, 7, 18); // August 18, 2025
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 30); // Look ahead 30 days
+    
+    const currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const month = currentDate.getMonth() + 1;
+      const day = currentDate.getDate();
+      const year = currentDate.getFullYear();
+      
+      // Try different filename formats
+      const formats = [
+        `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}-${year} CCIP.csv`,
+        `${month}-${day}-${year} CCIP.csv`,
+        `0${month}-${day}-${year} CCIP.csv` // Handle single digit months with leading zero
+      ];
+      
+      for (const filename of formats) {
+        try {
+          const response = await fetch(`/${filename}`, { method: 'HEAD' });
+          if (response.ok && !csvFiles.includes(filename)) {
+            csvFiles.push(filename);
+            break; // Found this date, move to next
+          }
+        } catch (error) {
+          // File doesn't exist, try next format
+        }
+      }
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    console.log(`Discovered ${csvFiles.length} CSV files:`, csvFiles);
+    return csvFiles;
+  }
+
   // Centralized data loading with caching
   async loadData(): Promise<void> {
     // If already loaded and cache is valid, return immediately
@@ -108,58 +169,8 @@ class CCIPDataService {
     try {
       console.log('Loading CSV data from files...');
       
-      // Load all available daily CSV files
-      const csvFiles = [
-        'CCIP Stats - 08-14-2025 CCIP.csv',
-        'CCIP Stats - 08-15-2025 CCIP.csv',
-        'CCIP Stats - 08-16-2025 CCIP.csv',
-        'CCIP Stats - 08-17-2025 CCIP.csv',
-        '08-18-2025 CCIP.csv',
-        '08-19-2025 CCIP.csv',
-        '08-20-2025 CCIP.csv',
-        '08-21-2025 CCIP.csv',
-        '08-22-2025 CCIP.csv',
-        '08-23-2025 CCIP.csv',
-        '08-24-2025 CCIP.csv',
-        '08-25-2025 CCIP.csv',
-        '08-26-2025 CCIP.csv',
-        '08-27-2025 CCIP.csv',
-        '08-28-2025 CCIP.csv',
-        '08-29-2025 CCIP.csv',
-        '08-30-2025 CCIP.csv',
-        '08-31-2025 CCIP.csv',
-        '09-1-2025 CCIP.csv',
-        '09-02-2025 CCIP.csv',
-        '09-03-2025 CCIP.csv',
-        '09-04-2025 CCIP.csv',
-        '09-05-2025 CCIP.csv',
-        '09-06-2025 CCIP.csv',
-        '09-07-2025 CCIP.csv',
-        '09-08-2025 CCIP.csv',
-        '09-09-2025 CCIP.csv',
-        '09-10-2025 CCIP.csv',
-        "09-11-2025 CCIP.csv",
-        "09-12-2025 CCIP.csv",
-        "09-13-2025 CCIP.csv",
-        "09-14-2025 CCIP.csv",
-        "09-15-2025 CCIP.csv",
-        "09-16-2025 CCIP.csv",
-        "09-17-2025 CCIP.csv",
-        "09-18-2025 CCIP.csv",
-        "09-19-2025 CCIP.csv",
-        "09-20-2025 CCIP.csv",
-        "09-21-2025 CCIP.csv",
-        "09-22-2025 CCIP.csv",
-        "09-23-2025 CCIP.csv",
-        "09-24-2025 CCIP.csv",
-        "09-25-2025 CCIP.csv",
-        "09-26-2025 CCIP.csv",
-        "09-27-2025 CCIP.csv",
-        "09-28-2025 CCIP.csv",
-        "09-29-2025 CCIP.csv",
-        "09-30-2025 CCIP.csv",
-        "10-1-2025 CCIP.csv"
-      ];
+      // Dynamically discover all CSV files in the public folder
+      const csvFiles = await this.discoverCSVFiles();
 
       const loadPromises = csvFiles.map(async (filename) => {
         try {
@@ -345,7 +356,7 @@ class CCIPDataService {
 
   getDailyData(date: Date): DailyData | null {
     // Find the filename that matches this date
-    for (const [filename, data] of this.dailyData.entries()) {
+    for (const [_filename, data] of this.dailyData.entries()) {
       if (data.date.toISOString().split('T')[0] === date.toISOString().split('T')[0]) {
         return data;
       }
