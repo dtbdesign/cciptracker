@@ -496,7 +496,13 @@ class CCIPDataService {
     const tokenMap = new Map<string, { value: number; transactions: number; fees: number; chains: Set<string>; tokenName: string; symbol: string }>();
     currentDayData.transactions.forEach(tx => {
       // Use tokenName as the key to group by actual token, not address
-      const tokenKey = tx.tokenName || tx.token;
+      // Normalize the key to handle case variations and empty values
+      let tokenKey = tx.tokenName?.trim() || tx.token?.trim();
+      if (!tokenKey) {
+        console.warn('Transaction found with no token name or symbol:', tx);
+        return; // Skip transactions without token information
+      }
+      
       const existing = tokenMap.get(tokenKey) || { 
         value: 0, 
         transactions: 0, 
@@ -507,7 +513,7 @@ class CCIPDataService {
       };
       
       existing.value += tx.totalValue;
-      existing.transactions += 1;
+      existing.transactions += 1; // This counts every occurrence of the token
       existing.fees += tx.feeInUSD;
       existing.chains.add(tx.sourceNetworkName);
       existing.chains.add(tx.destNetworkName);
@@ -527,6 +533,12 @@ class CCIPDataService {
       }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 10);
+
+    // Debug logging to verify transaction counts
+    console.log('🪙 Top tokens transaction counts:');
+    topTokens.forEach((token, index) => {
+      console.log(`${index + 1}. ${token.name}: ${token.transactions} transactions, $${token.value.toFixed(0)} volume`);
+    });
 
     const metrics = {
       totalValueTransferred: currentDayData.totalValue,
@@ -635,7 +647,11 @@ class CCIPDataService {
 
     allTransactions.forEach(tx => {
       // Use tokenName as the key to group by actual token, not address
-      const tokenKey = tx.tokenName || tx.token;
+      // Normalize the key to handle case variations and empty values
+      let tokenKey = tx.tokenName?.trim() || tx.token?.trim();
+      if (!tokenKey) {
+        return; // Skip transactions without token information
+      }
       
       if (!tokenMap.has(tokenKey)) {
         tokenMap.set(tokenKey, {
@@ -650,7 +666,7 @@ class CCIPDataService {
       
       const tokenStats = tokenMap.get(tokenKey)!;
       tokenStats.volume += tx.totalValue;
-      tokenStats.transactions += 1;
+      tokenStats.transactions += 1; // This counts every occurrence of the token
       tokenStats.chains.add(tx.sourceNetworkName);
       tokenStats.chains.add(tx.destNetworkName);
     });
