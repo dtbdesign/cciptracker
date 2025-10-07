@@ -139,6 +139,12 @@ export const chainMapping: Record<string, ChainInfo> = {
     logo: 'https://docs.chain.link/assets/chains/wemix.svg',
     color: '#8B4513'
   },
+  '0g-mainnet': {
+    shortName: '0g',
+    displayName: '0G',
+    logo: 'https://docs.chain.link/assets/chains/0g.svg',
+    color: '#8B4513'
+  },
   'plasma-mainnet': {
     shortName: 'Plasma',
     displayName: 'Plasma',
