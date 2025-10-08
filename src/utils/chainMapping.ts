@@ -145,6 +145,12 @@ export const chainMapping: Record<string, ChainInfo> = {
     logo: 'https://docs.chain.link/assets/chains/0g.svg',
     color: '#8B4513'
   },
+  'aptos-mainnet': {
+    shortName: 'aptos',
+    displayName: 'Aptos',
+    logo: 'https://docs.chain.link/assets/chains/aptos.svg',
+    color: '#8B4513'
+  },
   'plasma-mainnet': {
     shortName: 'Plasma',
     displayName: 'Plasma',
