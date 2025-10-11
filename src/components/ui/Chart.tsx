@@ -103,7 +103,7 @@ const Chart: React.FC<ChartProps> = ({
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => `$${value.toLocaleString()}`}
-                domain={[0, 12000]}
+                domain={[0, 'auto']}
               />
               <Tooltip content={<CustomTooltip />} />
               <Area
@@ -133,7 +133,7 @@ const Chart: React.FC<ChartProps> = ({
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => `$${value.toLocaleString()}`}
-                domain={[0, 12000]}
+                domain={[0, 'auto']}
               />
               <Tooltip content={<CustomTooltip />} />
               <Line
