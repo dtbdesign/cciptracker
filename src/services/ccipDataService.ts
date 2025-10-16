@@ -457,7 +457,7 @@ class CCIPDataService {
         if (b.transactions !== a.transactions) return b.transactions - a.transactions;
         return b.fees - a.fees;
       })
-      .slice(0, 10);
+      .slice(0, 30); // Return top 30 instead of top 10 for client-side filtering
 
     // Calculate top destination chains
     const destChainMap = new Map<string, { value: number; transactions: number; fees: number }>();
@@ -490,7 +490,7 @@ class CCIPDataService {
         if (b.transactions !== a.transactions) return b.transactions - a.transactions;
         return b.fees - a.fees;
       })
-      .slice(0, 10);
+      .slice(0, 30); // Return top 30 instead of top 10 for client-side filtering
 
     // Calculate top tokens - group by token name, not address
     const tokenMap = new Map<string, { value: number; transactions: number; fees: number; chains: Set<string>; tokenName: string; symbol: string }>();

@@ -25,10 +25,7 @@ const TopListCard: React.FC<TopListCardProps> = ({ title, data, icon: Icon }) =>
   const isChainList = title.toLowerCase().includes('chain');
   const [sortField, setSortField] = useState<SortField>('value');
 
-  // Debug logging
-  console.log('TopListCard render:', { title, sortField, dataLength: data.length });
-
-  // Sort data based on selected field
+  // Sort data based on selected field and take top 10
   const sortedData = useMemo(() => {
     const sorted = [...data].sort((a, b) => {
       switch (sortField) {
@@ -45,8 +42,19 @@ const TopListCard: React.FC<TopListCardProps> = ({ title, data, icon: Icon }) =>
           return bValue - aValue;
       }
     });
-    return sorted;
-  }, [data, sortField]);
+    // Return only top 10 after sorting by the selected field
+    const top10 = sorted.slice(0, 10);
+    
+    // Debug logging
+    console.log(`${title} - Sort by ${sortField}:`, top10.map(item => ({
+      name: item.name,
+      value: item.value,
+      txs: item.transactions,
+      fees: item.fees
+    })));
+    
+    return top10;
+  }, [data, sortField, title]);
 
   const handleSort = (field: SortField) => {
     console.log('Sort clicked:', field, 'previous sortField:', sortField);
